@@ -10,7 +10,7 @@
 
 ## 🤖 AI Coding 驱动开发
 
-**Malo RSS 订阅助手**是一个 **100% AI Coding** 项目 —— 从架构设计、功能实现、UI 样式到 Bug 修复，所有代码均由 AI 编程助手（Malo / Cursor）生成，**未手写任何一行代码**。人工仅负责提出需求、验收效果和测试反馈，全程以自然语言驱动开发。
+**Malo RSS 订阅助手**是一个 **100% AI Coding** 项目 —— 从架构设计、功能实现、UI 样式到 Bug 修复，所有代码均由 AI 编程助手（CatPaw / Cursor）生成，**未手写任何一行代码**。人工仅负责提出需求、验收效果和测试反馈，全程以自然语言驱动开发。
 
 ---
 
@@ -200,72 +200,90 @@ npm run dev:app
 ## 📁 项目结构
 
 ```
-rss-chrome-extension/
-├── manifest.json               # MV3 扩展配置
-├── package.json                # 依赖管理 & 构建脚本
-├── tsconfig.json               # TypeScript 编译配置（strict + paths alias）
-├── vite.config.ts              # Chrome 扩展 Vite 构建配置
-├── vite.electron.config.ts     # Electron 桌面版 Vite 构建配置
-├── electron-builder.json5      # Electron 打包配置（macOS DMG/ZIP）
-├── build.sh                    # Chrome 扩展打包脚本（输出 zip）
-├── feeds/                      # 预置订阅源目录（按日期命名，导入最新即可）
-├── assets/                     # 扩展图标 & UI 图标
-│   ├── icon16/48/128.png       # 应用图标
-│   ├── icons/*.svg             # UI 矢量图标
-│   └── screenshots/            # 界面截图（README 展示用）
-├── electron/                   # Electron 主进程代码
-│   ├── main.ts                 # 主进程入口（窗口管理、macOS 生命周期）
-│   ├── preload.ts              # 预加载脚本（contextBridge 暴露 IPC API）
-│   ├── ipc-handlers.ts         # IPC 消息处理（storage / fetch / window）
-│   ├── storage.ts              # electron-store 封装（sync / local 存储）
-│   ├── fetcher.ts              # 后台定时抓取（Node.js fetch 实现）
-│   └── tray.ts                 # macOS 系统托盘（菜单栏图标 + 右键菜单）
-├── dist/                       # 构建产物 —— Chrome 扩展 / Electron 渲染进程
-├── dist-electron/              # 构建产物 —— Electron 主进程
+malo/
+├── manifest.json               # Chrome 扩展 MV3 配置
+├── package.json                # 依赖与脚本（dev / build / pack）
+├── tsconfig.json               # TypeScript 严格模式与路径别名
+├── vite.config.ts              # 扩展构建（Vite）
+├── vite.electron.config.ts     # 桌面版构建（Vite + Electron）
+├── electron-builder.json5      # 桌面应用打包（macOS DMG/ZIP）
+├── build.sh                    # 扩展打包脚本（产出 zip）
+├── _gen_icons.py               # 图标生成（扩展 + 桌面 + 托盘）
+├── STORAGE.md                  # 存储结构说明（可选阅读）
+├── feeds/                      # 预置订阅源（rss-feeds-<日期>.json，导入最新即可）
+├── assets/
+│   ├── icons/
+│   │   ├── extension/           # 扩展图标 16 / 48 / 128
+│   │   ├── app/                # 桌面图标 icns、托盘 template
+│   │   └── *.svg               # 界面用矢量图标
+│   └── screenshots/            # README 截图
+├── electron/                   # 桌面版主进程
+│   ├── main.ts                 # 入口、窗口、生命周期
+│   ├── preload.ts              # 预加载（contextBridge 暴露 IPC）
+│   ├── ipc-handlers.ts         # IPC：storage / fetch / window
+│   ├── storage.ts              # electron-store（sync + local）
+│   ├── fetcher.ts              # 定时抓取（Node fetch）
+│   └── tray.ts                 # 菜单栏托盘与右键菜单
+├── dist/                       # 构建产物：扩展包 / 桌面版渲染资源
+├── dist-electron/              # 构建产物：桌面版主进程
 └── src/
-    ├── platform/               # 平台抽象层
-    │   └── index.ts            # 统一 API（自动切换 Chrome / Electron 实现）
-    ├── popup/                  # 弹窗 / 主界面
-    │   ├── index.html          # 界面 HTML（四栏标签页）
-    │   ├── index.ts            # 入口（初始化各 UI 模块并协调交互）
-    │   ├── theme.ts            # 主题切换（light / dark）
-    │   ├── tabs.ts             # 标签页切换
-    │   ├── feeds.ts            # 订阅源列表管理（添加/删除/导入/导出）
-    │   ├── articles.ts         # 文章列表逻辑（筛选/收藏/标记已读/懒加载）
-    │   ├── articles-render.ts  # 文章列表渲染（DOM 构建）
-    │   ├── articles-ai.ts      # 文章 AI 总结入口
-    │   ├── detect.ts           # 发现页：RSS 源检测 & 网页订阅
-    │   ├── ai-settings.ts      # AI 设置面板
-    │   └── shared.ts           # 共享 UI 工具（Toast、Loading bar、状态文本）
+    ├── platform/index.ts       # 平台抽象（Chrome / Electron 自动切换）
+    ├── types.ts                # 共享类型
+    ├── constants.ts            # 常量
+    ├── utils/                  # 工具函数
+    │   ├── format.ts           # 日期等格式化
+    │   └── html.ts             # HTML 处理
+    ├── popup/                  # 主界面（四栏：文章 / 订阅源 / 发现 / 配置）
+    │   ├── index.html
+    │   ├── index.ts            # 入口与模块协调
+    │   ├── theme.ts            # 深色 / 浅色主题
+    │   ├── tabs.ts
+    │   ├── feeds.ts            # 订阅源列表
+    │   ├── feeds-io.ts         # 导入 / 导出
+    │   ├── feeds-dnd.ts        # 拖拽排序
+    │   ├── articles.ts         # 文章列表、筛选、收藏、已读
+    │   ├── articles-render.ts  # 列表 DOM 渲染
+    │   ├── articles-ai.ts     # 打开 AI 解读
+    │   ├── detect.ts           # 发现页（RSS 检测、网页订阅）
+    │   ├── ai-settings.ts      # AI 配置面板
+    │   ├── sync.ts             # 插件 / 桌面数据同步
+    │   └── shared.ts           # Toast、Loading、状态文案
     ├── ai-panel/               # AI 解读独立窗口
-    │   ├── index.html          # AI 解读窗口页面
-    │   ├── index.ts            # 入口（总结流程、UI 控制）
-    │   ├── summarize.ts        # 文章总结（内容提取 + 流式调用）
-    │   ├── markdown.ts         # Markdown → HTML 渲染器
-    │   └── chat.ts             # 多轮聊天问答
+    │   ├── index.html
+    │   ├── index.ts            # 总结流程与 UI 控制
+    │   ├── summarize.ts        # 内容提取 + 流式调用
+    │   ├── markdown.ts         # Markdown 渲染
+    │   ├── chat.ts             # 多轮问答
+    │   └── ui.ts               # 解读窗口 UI 组件
     ├── background/             # Chrome Service Worker
-    │   └── index.ts            # 定时抓取、类型检测、标签页注入
-    ├── content/                # Content Script
-    │   └── detector.ts         # 检测页面 RSS 源 + 文章内容
-    ├── services/               # 业务逻辑层（无 DOM 依赖）
-    │   ├── storage/            # 存储封装（sync / local，含数据迁移）
-    │   ├── ai.ts               # AI 服务（SSE 流式解析、总结、对话）
-    │   ├── content.ts          # 内容提取（HTML / PDF）
-    │   ├── parser.ts           # RSS/Atom XML 解析
-    │   └── scraper.ts          # 静态 HTML 文章链接抓取
-    ├── types.ts                # 共享 TypeScript 类型定义
-    ├── constants.ts            # 常量定义
-    └── styles/                 # 模块化样式
-        ├── variables.css       # 设计令牌 & 主题变量（light / dark）
-        ├── base.css            # 全局基础样式 & Electron 平台适配
-        ├── components.css      # 通用组件（按钮、卡片、输入框等）
-        ├── header.css          # 顶部栏 & 主题切换按钮
-        ├── tabs.css            # 标签页导航
-        ├── feeds.css           # 订阅源列表样式
-        ├── articles.css        # 文章列表 & 筛选栏样式
-        ├── discover.css        # 发现页样式
-        ├── ai-panel.css        # AI 解读窗口样式
-        └── ai-settings.css     # AI 设置表单样式
+    │   ├── index.ts            # 定时抓取、类型检测、标签页注入
+    │   ├── fetcher.ts          # 扩展侧抓取逻辑
+    │   └── utils.ts
+    ├── detector/               # Content Script（注入到网页）
+    │   └── index.ts            # RSS 源与文章内容检测
+    ├── services/               # 业务逻辑（无 DOM）
+    │   ├── storage/            # 存储封装与迁移
+    │   │   ├── index.ts
+    │   │   ├── feeds.ts
+    │   │   ├── items.ts
+    │   │   ├── favorites.ts
+    │   │   └── helpers.ts
+    │   ├── ai.ts               # AI 请求与 SSE 解析
+    │   ├── content.ts          # 正文提取（HTML / PDF）
+    │   ├── parser.ts           # RSS/Atom 解析
+    │   ├── scraper.ts          # 静态 HTML 文章链接抓取
+    │   └── page-scraper.ts     # 单页抓取（含 JS 渲染）
+    └── styles/                 # 模块化 CSS
+        ├── variables.css       # 主题变量
+        ├── base.css            # 全局与桌面适配
+        ├── components.css      # 按钮、卡片、输入框等
+        ├── header.css
+        ├── tabs.css
+        ├── feeds.css
+        ├── articles.css
+        ├── discover.css
+        ├── ai-panel.css
+        └── ai-settings.css
 ```
 
 ---
