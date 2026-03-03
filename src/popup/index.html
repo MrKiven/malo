@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Malo RSS 订阅助手</title>
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="../styles/variables.css">
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <link rel="stylesheet" href="../styles/header.css">
+  <link rel="stylesheet" href="../styles/tabs.css">
+  <link rel="stylesheet" href="../styles/feeds.css">
+  <link rel="stylesheet" href="../styles/articles.css">
+  <link rel="stylesheet" href="../styles/discover.css">
+  <link rel="stylesheet" href="../styles/ai-settings.css">
+  <script type="module" src="./index.ts"></script>
+</head>
+<body>
+
+  <!-- ── Loading bar ──────────────────────────────── -->
+  <div class="loading-bar" id="loading-bar"></div>
+
+  <!-- ── Header ─────────────────────────────────── -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="header-icon">
+          <img src="../../assets/icons/rss.svg" alt="" />
+        </div>
+        <h1>Malo RSS 订阅助手</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn-summarize-page tooltip-right" id="summarize-page" data-tooltip="总结当前打开的网页"><img src="../../assets/icons/sparkles.svg" width="13" height="13" alt="" /> AI 总结</button>
+        <button class="theme-toggle tooltip-right" id="theme-toggle" data-tooltip="切换主题" aria-label="切换主题">
+          <!-- Sun icon (shown in light mode) -->
+          <img class="icon-sun" src="../../assets/icons/sun.svg" alt="" />
+          <!-- Moon icon (shown in dark mode) -->
+          <img class="icon-moon" src="../../assets/icons/moon.svg" alt="" />
+        </button>
+      </div>
+    </div>
+
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="articles" role="tab" aria-selected="true">
+        <img src="../../assets/icons/book-open.svg" width="14" height="14" style="vertical-align:-2px;margin-right:4px;" alt="" />
+        文章
+        <span class="tab-badge" id="unread-badge"></span>
+      </button>
+      <button class="tab-btn" data-tab="feeds" role="tab" aria-selected="false">
+        <img src="../../assets/icons/rss-feed.svg" width="14" height="14" style="vertical-align:-2px;margin-right:4px;" alt="" />
+        订阅源
+      </button>
+      <button class="tab-btn" data-tab="discover" role="tab" aria-selected="false">
+        <img src="../../assets/icons/compass.svg" width="14" height="14" style="vertical-align:-2px;margin-right:4px;" alt="" />
+        发现
+        <span class="tab-dot" id="discover-dot"></span>
+      </button>
+      <button class="tab-btn" data-tab="settings" role="tab" aria-selected="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        配置
+      </button>
+    </nav>
+  </div>
+
+  <!-- ── Tab: 文章 ──────────────────────────────── -->
+  <div class="tab-pane active" data-pane="articles" role="tabpanel" id="articles-pane">
+    <div class="articles-sticky-header">
+      <div class="section-title">
+        <h2>最新条目</h2>
+        <div class="section-title-right">
+          <button id="mark-all-read" class="btn-icon" data-tooltip="标记全部已读">
+            <img src="../../assets/icons/eye.svg" alt="" />
+            全部已读
+          </button>
+          <button id="refresh-items" class="btn-icon" data-tooltip="刷新文章列表">
+            <img src="../../assets/icons/refresh.svg" alt="" />
+            刷新
+          </button>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-select-wrap">
+          <img class="filter-select-icon" src="../../assets/icons/rss-feed.svg" alt="" />
+          <select id="filter-source" class="filter-select" aria-label="筛选来源">
+            <option value="">全部来源</option>
+          </select>
+        </div>
+        <div class="filter-input-wrap">
+          <img class="filter-input-icon" src="../../assets/icons/search.svg" alt="" />
+          <input id="filter-keyword" type="text" class="filter-input" placeholder="搜索标题或摘要..." aria-label="搜索文章" />
+        </div>
+        <button id="filter-unread" class="filter-unread" data-tooltip="仅看未读">
+          <img src="../../assets/icons/book.svg" alt="" />
+        </button>
+        <button id="filter-fav" class="filter-fav" data-tooltip="仅看收藏">
+          <img src="../../assets/icons/star-filled.svg" alt="" />
+        </button>
+      </div>
+    </div>
+    <ul class="list article-list-container" id="item-list"></ul>
+    <button class="btn-back-top" id="btn-back-top" data-tooltip="回到顶部" aria-label="回到顶部">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
+    <div id="empty-items" class="empty">
+      <div class="empty-icon">
+        <img src="../../assets/icons/bar-chart.svg" alt="" />
+      </div>
+      <div class="empty-text">还没有文章<br><span>添加订阅源后点击"刷新"获取最新内容</span></div>
+    </div>
+    <div id="empty-filter" class="empty" style="display:none;">
+      <div class="empty-icon">
+        <img src="../../assets/icons/search.svg" alt="" />
+      </div>
+      <div class="empty-text">没有匹配的条目<br><span>试试调整筛选条件</span></div>
+    </div>
+  </div>
+
+  <!-- ── Tab: 订阅源 ────────────────────────────── -->
+  <div class="tab-pane" data-pane="feeds" role="tabpanel">
+    <div class="card">
+      <div class="input-row">
+        <input id="feed-input" type="url" placeholder="输入 RSS 或博客网址" aria-label="订阅源地址" />
+        <button id="add-feed" class="btn btn-primary">添加</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div id="feeds-section">
+      <div class="section-title">
+        <h2>已订阅</h2>
+        <div class="section-title-right">
+          <span class="count" id="feed-count" hidden></span>
+          <select id="feed-sort" class="filter-select feed-sort" data-tooltip="排序方式" aria-label="排序方式">
+            <option value="">默认</option>
+            <option value="type">按类型</option>
+          </select>
+          <div class="section-actions">
+            <button id="export-feeds" class="btn-icon" data-tooltip="导出订阅源">
+              <img src="../../assets/icons/download.svg" width="12" height="12" alt="" />
+              导出
+            </button>
+            <button id="import-feeds" class="btn-icon" data-tooltip="导入订阅源">
+              <img src="../../assets/icons/upload.svg" width="12" height="12" alt="" />
+              导入
+            </button>
+            <input id="import-file" type="file" accept=".json,application/json" style="display:none" />
+          </div>
+        </div>
+      </div>
+      <div class="card" id="feed-list-card" style="padding:4px 16px;">
+        <ul class="list" id="feed-list"></ul>
+      </div>
+      <div id="empty-feeds" class="empty">
+        <div class="empty-icon">
+          <img src="../../assets/icons/rss-feed.svg" alt="" />
+        </div>
+        <div class="empty-text">还没有订阅源<br><span>在上方输入 RSS 地址或博客网址添加</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab: 发现 ──────────────────────────────── -->
+  <div class="tab-pane" data-pane="discover" role="tabpanel">
+    <div class="section-title">
+      <h2>发现订阅</h2>
+      <div class="section-title-right">
+        <button id="discover-refresh" class="btn-icon" data-tooltip="重新检测当前页面">
+          <img src="../../assets/icons/compass.svg" alt="" />
+          主动发现
+        </button>
+      </div>
+    </div>
+    <!-- 当前网页可订阅 -->
+    <div id="page-subscribe-section" style="display:none;">
+      <div class="section-title section-title-sub">
+        <h2>当前网页</h2>
+      </div>
+      <div class="card page-subscribe-card">
+        <div class="page-subscribe-info">
+          <div class="page-subscribe-icon">
+            <img src="../../assets/icons/globe.svg" alt="" />
+          </div>
+          <div class="page-subscribe-detail">
+            <div class="page-subscribe-title" id="page-title"></div>
+            <div class="page-subscribe-url" id="page-url"></div>
+            <div class="page-subscribe-hint" id="page-hint"></div>
+          </div>
+        </div>
+        <div class="page-subscribe-samples" id="page-samples"></div>
+        <button class="btn btn-primary page-subscribe-btn" id="page-subscribe-btn">订阅此网页</button>
+      </div>
+    </div>
+
+    <!-- RSS 源发现 -->
+    <div id="detected-section" style="display:none;">
+      <div class="section-title section-title-sub">
+        <h2>RSS 源</h2>
+        <span class="count" id="detected-count"></span>
+      </div>
+      <div class="card" style="padding:4px 16px;">
+        <ul class="list" id="detected-list"></ul>
+      </div>
+    </div>
+    <div id="no-detected" class="empty">
+      <div class="empty-icon">
+        <img src="../../assets/icons/compass.svg" alt="" />
+      </div>
+      <div class="empty-text">未发现可订阅内容<br><span>访问博客或含 RSS 的网站后再试试</span></div>
+    </div>
+  </div>
+
+  <!-- ── Tab: 配置 ──────────────────────────────── -->
+  <div class="tab-pane" data-pane="settings" role="tabpanel">
+    <div class="card ai-settings-card">
+      <div class="ai-settings-form">
+        <div class="section-title" style="margin-bottom:14px;">
+          <h2><img src="../../assets/icons/sparkles.svg" width="14" height="14" style="vertical-align:-2px;margin-right:4px;" alt="" /> AI 设置</h2>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ai-base-url">
+            API 地址
+            <span class="form-hint">OpenAI 兼容接口（如 DeepSeek、Moonshot）</span>
+          </label>
+          <input id="ai-base-url" type="url" class="form-input" placeholder="https://api.openai.com/v1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ai-api-key">
+            API Key
+            <span class="form-hint">你的 API 密钥，本地存储不会上传</span>
+          </label>
+          <div class="form-input-row">
+            <input id="ai-api-key" type="password" class="form-input" placeholder="sk-..." />
+            <button id="ai-key-toggle" class="btn-icon" data-tooltip="显示/隐藏">
+              <img src="../../assets/icons/eye.svg" width="14" height="14" alt="" />
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ai-model">
+            模型
+            <span class="form-hint">选择或输入模型名称</span>
+          </label>
+          <div class="model-select-wrap">
+            <div class="form-input-row">
+              <input id="ai-model" type="text" class="form-input" placeholder="输入模型名或点击获取" autocomplete="off" />
+              <button id="ai-fetch-models" class="btn-icon btn-fetch-models" data-tooltip="从 API 获取可用模型列表">
+                <img src="../../assets/icons/refresh.svg" width="12" height="12" alt="" />
+                获取模型
+              </button>
+            </div>
+            <ul class="model-dropdown" id="ai-model-dropdown"></ul>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ai-prompt">
+            自定义 Prompt
+            <span class="form-hint">留空则使用默认 Prompt（文章总结与解读）</span>
+          </label>
+          <textarea id="ai-prompt" class="form-input form-textarea" rows="4" placeholder="你是一位专业的阅读助手。请对用户提供的文章进行高质量的结构化总结…"></textarea>
+        </div>
+        <details class="advanced-settings" id="ai-advanced">
+          <summary class="advanced-settings-toggle">高级参数</summary>
+          <div class="advanced-settings-body">
+            <div class="form-group-row">
+              <div class="form-group form-group-half">
+                <label class="form-label" for="ai-temperature">
+                  Temperature
+                  <span class="form-hint">创造性 0-2，默认 0.7</span>
+                </label>
+                <input id="ai-temperature" type="number" class="form-input" min="0" max="2" step="0.1" placeholder="0.7" />
+              </div>
+              <div class="form-group form-group-half">
+                <label class="form-label" for="ai-max-tokens">
+                  Max Tokens
+                  <span class="form-hint">最大输出长度，默认 8192</span>
+                </label>
+                <input id="ai-max-tokens" type="number" class="form-input" min="256" max="131072" step="256" placeholder="8192" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ai-max-content-length">
+                最大内容长度
+                <span class="form-hint">发送给模型的文章字符上限，默认 80000</span>
+              </label>
+              <input id="ai-max-content-length" type="number" class="form-input" min="5000" max="500000" step="5000" placeholder="80000" />
+            </div>
+          </div>
+        </details>
+        <div class="form-actions">
+          <button id="ai-save" class="btn btn-primary">保存配置</button>
+          <button id="ai-test" class="btn">测试连接</button>
+        </div>
+        <div class="status" id="ai-status"></div>
+      </div>
+    </div>
+    <div class="card sync-card">
+      <div class="sync-card-header">
+        <div class="sync-card-title">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          插件 / App 数据同步
+        </div>
+        <div class="sync-card-hint">在 Chrome 插件和桌面 App 之间同步订阅源、AI 配置、收藏等全部数据</div>
+      </div>
+      <div class="sync-card-actions">
+        <button id="sync-export" class="btn btn-sync">
+          <img src="../../assets/icons/download.svg" width="13" height="13" alt="" />
+          导出全部配置
+        </button>
+        <button id="sync-import" class="btn btn-sync">
+          <img src="../../assets/icons/upload.svg" width="13" height="13" alt="" />
+          导入配置文件
+        </button>
+        <input id="sync-import-file" type="file" accept=".json,application/json" style="display:none" />
+      </div>
+      <div class="status" id="sync-status"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+</body>
+</html>

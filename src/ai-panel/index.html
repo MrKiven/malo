@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 文章解读</title>
+  <link rel="stylesheet" href="../styles/variables.css">
+  <link rel="stylesheet" href="../styles/ai-panel.css">
+  <script type="module" src="./index.ts"></script>
+</head>
+<body>
+
+  <!-- 进度条 -->
+  <div class="ai-progress-bar" id="ai-progress-bar"></div>
+
+  <!-- 顶部标题栏 (紧凑型) -->
+  <header class="header">
+    <div class="header-left">
+      <div class="brand-icon">
+        <img src="../../assets/icons/sparkles.svg" alt="" />
+      </div>
+      <h1 class="header-title">AI 解读</h1>
+    </div>
+    <div class="header-right">
+      <span class="brand-badge">Powered by AI</span>
+    </div>
+  </header>
+
+  <!-- 文章信息条 (整块可点击) -->
+  <a class="article-bar" id="article-link" target="_blank" rel="noopener noreferrer">
+    <div class="article-bar-icon">
+      <img src="../../assets/icons/book.svg" alt="" />
+    </div>
+    <div class="article-bar-content">
+      <span class="article-bar-title" id="article-title"></span>
+      <span class="article-bar-desc" id="article-desc"></span>
+      <span class="article-bar-url">
+        <img src="../../assets/icons/external-link.svg" width="10" height="10" alt="" />
+        <span id="article-link-text"></span>
+      </span>
+    </div>
+  </a>
+
+  <!-- 内容区域 -->
+  <main class="panel-body" id="panel-body">
+    <!-- 占位状态 -->
+    <div class="state-placeholder" id="ai-placeholder">
+      <div class="placeholder-visual">
+        <div class="placeholder-ring"></div>
+        <div class="placeholder-icon-wrap">
+          <img src="../../assets/icons/sparkles.svg" alt="" />
+        </div>
+      </div>
+      <div class="placeholder-label">准备就绪</div>
+      <div class="placeholder-hint">点击下方按钮，让 AI 为你解读文章核心内容</div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="state-loading" id="ai-loading" style="display:none;">
+      <div class="loading-visual">
+        <div class="loading-spinner"></div>
+        <div class="loading-pulse"></div>
+      </div>
+      <div class="loading-label" id="ai-loading-text">AI 正在分析文章…</div>
+      <div class="loading-hint">通常需要几秒钟，请稍候</div>
+    </div>
+
+    <!-- 结果 -->
+    <div class="ai-result" id="ai-result"></div>
+
+    <!-- 错误 -->
+    <div class="ai-error" id="ai-error">
+      <div class="error-icon">
+        <img src="../../assets/icons/x-circle.svg" alt="" />
+      </div>
+      <div class="error-text" id="ai-error-text"></div>
+    </div>
+
+    <!-- 请求与响应详情 (放在结果之后) -->
+    <details class="request-details" id="request-details" style="display:none;">
+      <summary class="request-summary">
+        <span class="request-summary-icon">📤</span>
+        <span class="request-summary-text">查看请求与响应详情</span>
+        <span class="request-summary-arrow"></span>
+      </summary>
+      <div class="request-content" id="request-content"></div>
+    </details>
+  </main>
+
+  <!-- 底部操作栏 -->
+  <footer class="panel-footer">
+    <div class="footer-actions" id="footer-actions">
+      <button id="ai-start" class="btn btn-primary btn-lg">
+        <img src="../../assets/icons/sparkles.svg" width="14" height="14" alt="" />
+        开始解读
+      </button>
+      <button id="ai-copy" class="btn btn-ghost btn-lg" style="display:none;">
+        <span id="copy-text">复制内容</span>
+      </button>
+      <button id="ai-retry" class="btn btn-primary btn-lg" style="display:none;">重新生成</button>
+      <button id="ai-stop" class="btn btn-danger-ghost btn-lg" style="display:none;">停止生成</button>
+      <button id="ai-close" class="btn btn-ghost btn-sm footer-close">关闭窗口</button>
+    </div>
+    <div class="chat-input-wrap" id="chat-input-wrap" style="display:none;">
+      <div class="chat-quick-chips" id="chat-quick-chips">
+        <button class="chip" data-q="这篇文章的核心观点是什么？">核心观点</button>
+        <button class="chip" data-q="能否用更通俗的语言解释一下？">通俗解释</button>
+        <button class="chip" data-q="这篇文章有哪些不足或值得质疑的地方？">质疑与不足</button>
+        <button class="chip" data-q="基于这篇文章，有哪些延伸阅读建议？">延伸阅读</button>
+      </div>
+      <div class="chat-input-box">
+        <textarea
+          id="chat-input"
+          class="chat-input"
+          placeholder="基于文章继续提问…"
+          rows="1"
+        ></textarea>
+        <button id="chat-send" class="btn btn-primary chat-send-btn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <button id="chat-stop" class="btn btn-danger-ghost chat-stop-btn" style="display:none;">
+          停止
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 确认弹窗 -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-dialog">
+      <div class="confirm-message" id="confirm-message"></div>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="confirm-cancel">取消</button>
+        <button class="btn btn-primary" id="confirm-ok">确定关闭</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

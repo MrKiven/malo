@@ -1,0 +1,34 @@
+{
+  "name": "malo-rss",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "npm run dev:extension",
+    "dev:extension": "vite build --watch --mode development",
+    "dev:app": "vite --config vite.electron.config.ts",
+    "app": "unset ELECTRON_RUN_AS_NODE && electron .",
+    "build": "echo '\n📦 [1/2] Building Chrome Extension...' && npm run --silent build:extension && echo '\n🖥️  [2/2] Building Desktop App...' && npm run --silent build:app && echo '\n✅ Build complete!'",
+    "build:extension": "tsc --noEmit && vite build",
+    "build:app": "vite build --config vite.electron.config.ts",
+    "pack": "npm run pack:extension && npm run pack:app",
+    "pack:extension": "npm run build:extension && bash build.sh",
+    "pack:app": "npm run build:app && electron-builder --mac --config electron-builder.json5",
+    "clean": "rm -rf dist dist-electron release"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.287",
+    "@types/node": "^25.3.2",
+    "electron": "^40.6.1",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.14",
+    "vite-plugin-electron": "^0.29.0",
+    "vite-plugin-electron-renderer": "^0.14.6"
+  },
+  "dependencies": {
+    "electron-store": "^11.0.2",
+    "pdfjs-dist": "^5.4.624"
+  }
+}

@@ -1,0 +1,151 @@
+/* ── Feed item ─────────────────────────────── */
+.feed-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px;
+  transition: background var(--transition), box-shadow 0.2s ease, opacity 0.2s ease, transform 0.15s ease;
+  border-radius: var(--radius-xs);
+  animation: fadeInUp 0.2s ease both;
+  cursor: default;
+}
+.feed-item:hover { background: var(--bg-hover); }
+.feed-item + .feed-item { border-top: 1px solid var(--border-light); }
+
+/* ── Drag handle ──────────────────────────── */
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  cursor: grab;
+  color: var(--text-muted);
+  opacity: 0.3;
+  transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  border-radius: var(--radius-xs);
+  user-select: none;
+}
+.feed-item:hover .drag-handle { opacity: 0.6; }
+.drag-handle:hover {
+  opacity: 1 !important;
+  color: var(--primary);
+  transform: scale(1.1);
+}
+.drag-handle:active { cursor: grabbing; }
+
+/* ── Drag states ──────────────────────────── */
+.feed-item.dragging {
+  opacity: 0.35;
+  background: var(--bg-tertiary);
+  box-shadow: none;
+}
+.feed-item.drag-over-top {
+  box-shadow: 0 -2px 0 0 var(--primary) inset;
+  border-top-color: transparent;
+}
+.feed-item.drag-over-bottom {
+  box-shadow: 0 2px 0 0 var(--primary) inset;
+}
+.feed-item.drag-over-top + .feed-item {
+  border-top-color: transparent;
+}
+.feed-item[draggable="true"] {
+  cursor: grab;
+}
+.feed-item[draggable="true"]:active {
+  cursor: grabbing;
+}
+.feed-url {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+a.feed-url:hover { color: var(--primary); }
+.feed-type {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.feed-type.rss { background: #fff7ed; color: #ea580c; }
+.feed-type.page { background: #ecfdf5; color: #059669; }
+.feed-type.page-js { background: #eff6ff; color: #2563eb; }
+.feed-type.unknown { background: var(--bg-tertiary); color: var(--text-muted); }
+
+/* ── Pause button ─────────────────────────── */
+.btn-pause {
+  color: var(--warning);
+  background: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: var(--radius-xs);
+  border: 1px solid transparent;
+  transition: all var(--transition);
+  font-weight: 500;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.btn-pause:hover {
+  background: var(--warning-light);
+  border-color: rgba(245, 158, 11, 0.15);
+  color: var(--warning);
+}
+.btn-pause.is-paused {
+  color: var(--success);
+}
+.btn-pause.is-paused:hover {
+  background: var(--success-light);
+  border-color: rgba(16, 185, 129, 0.15);
+  color: var(--success);
+}
+.btn-pause:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Paused feed state ────────────────────── */
+.feed-item.feed-paused .feed-url {
+  opacity: 0.5;
+  text-decoration: line-through;
+  text-decoration-color: var(--text-muted);
+}
+.feed-type.paused {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+/* ── Dark mode pause overrides ────────────── */
+html[data-theme="dark"] .feed-type.paused {
+  background: rgba(251, 191, 36, 0.12);
+  color: #fbbf24;
+}
+
+/* ── Feed sort select ──────────────────────── */
+.feed-sort { max-width: 80px; }
+
+/* ── Stagger animation ─────────────────────── */
+.feed-item:nth-child(1) { animation-delay: 0s; }
+.feed-item:nth-child(2) { animation-delay: 0.02s; }
+.feed-item:nth-child(3) { animation-delay: 0.04s; }
+.feed-item:nth-child(4) { animation-delay: 0.06s; }
+.feed-item:nth-child(5) { animation-delay: 0.08s; }
+
+/* ── Dark mode feed overrides ─────────────── */
+html[data-theme="dark"] .feed-type.rss { background: rgba(251,146,60,0.12); color: #fb923c; }
+html[data-theme="dark"] .feed-type.page { background: rgba(52,211,153,0.12); color: #34d399; }
+html[data-theme="dark"] .feed-type.page-js { background: rgba(96,165,250,0.12); color: #60a5fa; }
+html[data-theme="dark"] .feed-type.unknown { background: var(--bg-tertiary); color: var(--text-muted); }
+html[data-theme="dark"] .drag-handle { color: var(--text-muted); }
+html[data-theme="dark"] .drag-handle:hover { color: var(--primary); }
+html[data-theme="dark"] .feed-item.dragging { background: var(--bg-tertiary); }
