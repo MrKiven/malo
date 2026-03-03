@@ -36,9 +36,12 @@ export interface PlatformAPI {
 }
 
 function createPlatform(): PlatformAPI {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).electronAPI) {
-    return createElectronPlatform();
+  // Service Worker 等环境没有 window，仅在有 window 且为 Electron 时用 Electron 实现
+  if (typeof globalThis.window !== "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((globalThis.window as any).electronAPI) {
+      return createElectronPlatform();
+    }
   }
   return createChromePlatform();
 }
@@ -107,8 +110,9 @@ function createChromePlatform(): PlatformAPI {
 }
 
 function createElectronPlatform(): PlatformAPI {
+  // 仅在有 window 时调用，此处可安全使用
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const api = (window as any).electronAPI;
+  const api = (globalThis.window as any).electronAPI;
 
   return {
     storage: {

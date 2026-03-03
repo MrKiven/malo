@@ -52,7 +52,8 @@ export default defineConfig({
   ],
   build: {
     outDir: "dist",
-    emptyOutDir: true,
+    // 完整 build 先跑 build:extension 再跑本配置；若为 true 会清空 dist 导致扩展缺失 manifest/background/detector
+    emptyOutDir: false,
     assetsDir: "assets",
     rollupOptions: {
       input: {
@@ -61,7 +62,8 @@ export default defineConfig({
       },
       output: {
         entryFileNames: "src/[name].js",
-        chunkFileNames: "src/chunks/[name].js",
+        // 与 extension 构建区分，避免覆盖 dist/src/chunks/*（background.js 依赖扩展构建的 format.js 等）
+        chunkFileNames: "src/chunks-app/[name].js",
         assetFileNames: (assetInfo) => {
           if (assetInfo.name?.endsWith(".css")) {
             return "src/[name][extname]";

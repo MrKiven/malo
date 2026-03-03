@@ -9,7 +9,7 @@
     "dev:extension": "vite build --watch --mode development",
     "dev:app": "vite --config vite.electron.config.ts",
     "app": "unset ELECTRON_RUN_AS_NODE && electron .",
-    "build": "echo '\n📦 [1/2] Building Chrome Extension...' && npm run --silent build:extension && echo '\n🖥️  [2/2] Building Desktop App...' && npm run --silent build:app && echo '\n✅ Build complete!'",
+    "build": "echo '\n📦 [1/2] Building Chrome Extension...' && npm run --silent build:extension && echo '\n🖥️  [2/2] Building Desktop App...' && npm run --silent build:app && echo '\n✅ Build complete!\n   Chrome 扩展：在 chrome://extensions 中「加载已解压的扩展程序」选择 dist/ 目录'",
     "build:extension": "tsc --noEmit && vite build",
     "build:app": "vite build --config vite.electron.config.ts",
     "pack": "npm run pack:extension && npm run pack:app",
