@@ -1,10 +1,14 @@
 import { defineConfig, type Plugin } from "vite";
 import { resolve } from "path";
-import { cpSync, copyFileSync } from "fs";
+import { cpSync, copyFileSync, readFileSync, writeFileSync } from "fs";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 
 /**
  * 构建后自动将 manifest.json、assets/ 和 PDF.js worker 复制到 dist/，
  * 使 dist/ 成为可直接加载到 Chrome 的完整扩展目录。
+ * manifest.json 的 version 字段会自动同步为 package.json 中的版本号。
  */
 function copyExtensionFiles(): Plugin {
   return {
@@ -12,7 +16,12 @@ function copyExtensionFiles(): Plugin {
     writeBundle() {
       const root = __dirname;
       const dist = resolve(root, "dist");
-      copyFileSync(resolve(root, "manifest.json"), resolve(dist, "manifest.json"));
+      // 读取 package.json 版本号，同步写入 manifest.json
+      const pkg = require("./package.json");
+      const manifestPath = resolve(root, "manifest.json");
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
+      manifest.version = pkg.version;
+      writeFileSync(resolve(dist, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
       cpSync(resolve(root, "assets"), resolve(dist, "assets"), { recursive: true });
       // 复制 PDF.js worker 文件（AI 总结 PDF 时需要）
       copyFileSync(

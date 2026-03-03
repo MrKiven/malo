@@ -7,7 +7,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DIST_DIR="$SCRIPT_DIR/dist"
 RELEASE_DIR="$SCRIPT_DIR/release"
-NAME="rss-chrome-extension"
+NAME="malo-rss"
 VERSION=$(node -p "require('./package.json').version")
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
